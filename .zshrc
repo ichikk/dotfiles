@@ -52,7 +52,7 @@ zcompile .zshrc
 ##================= リストの色つけの設定 =================##
 ##========================================================##
 # ls, #dir, vdir の設定
-alias s='screen -U'
+#alias s='screen -U'
 alias ll='ls -l'
 alias ls='ls -G --color'
 alias grep='grep --color=auto'
@@ -202,21 +202,17 @@ unsetopt no_clobber
 #setopt xtrace                # コマンドラインがどのように展開され実行されたかを表示する
 
 # less の動作（man less 参照）
-export LESS="-g -i -M -R -S -W -z-4 -x4"
-if type /usr/local/bin/lesspipe.sh &>/dev/null
+LESS=-MiRX
+export LESS
+if type /usr/bin/lesspipe &>/dev/null
 then
-LESSOPEN="| /usr/local/bin/lesspipe.sh '%s'"
-LESSCLOSE="/usr/local/bin/lesspipe.sh '%s' '%s'"
+LESSOPEN="| /usr/bin/lesspipe '%s'"
+LESSCLOSE="/usr/bin/lesspipe '%s' '%s'"
 export LESSOPEN LESSCLOSE
+elif type /usr/local/bin/lesspipe.sh &>/dev/null
+then
+export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
 fi
-export PAGER=less
-export LESS_TERMCAP_mb=$'\E[01;31m'      # Begins blinking.
-export LESS_TERMCAP_md=$'\E[01;31m'      # Begins bold.
-export LESS_TERMCAP_me=$'\E[0m'          # Ends mode.
-export LESS_TERMCAP_se=$'\E[0m'          # Ends standout-mode.
-export LESS_TERMCAP_so=$'\E[00;47;30m'   # Begins standout-mode.
-export LESS_TERMCAP_ue=$'\E[0m'          # Ends underline.
-export LESS_TERMCAP_us=$'\E[01;32m'      # Begins underline.
 
 umask 022 # ファイルを作るとき、どんな属性で作るか（man umask 参照）
 ulimit -s unlimited  # stack size 制限解除
@@ -225,6 +221,9 @@ limit coredumpsize 0 # core 抑制
 export G_FILENAME_ENCODING=@locale
 
 # タイトルバーの動的変更
+preexec () {
+        echo -ne "\ek${1%% *}\e\\"
+}
 precmd() {
 [[ -t 1 ]] || return
 case $TERM in
@@ -275,9 +274,5 @@ _acroread_version='7.0.9'
 alias close='screen -D'
 cd ~
 export LANG=en_US.UTF-8
-preexec () {
-        echo -ne "\ek${1%% *}\e\\"
-}
 fpath=(/usr/local/share/zsh-completions $fpath)
 alias diff=colordiff
-
